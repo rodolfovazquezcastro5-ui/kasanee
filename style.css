@@ -2871,3 +2871,169 @@ input:focus-visible {
 @media (max-width: 760px) and (orientation: landscape) {
     .orientation-hint { display: none !important; }
 }
+
+
+/* ============================================================
+   ONEWAY — GLASS TRANSPARENCY + MOBILE LANDSCAPE REFINEMENT
+   ============================================================ */
+
+/* Más transparencia en PC y móvil sin filtros de desenfoque excesivos. */
+.player-card {
+    background:
+        radial-gradient(ellipse at 14% 5%, rgba(160, 75, 255, .17), transparent 43%),
+        radial-gradient(ellipse at 95% 35%, rgba(30, 205, 255, .13), transparent 46%),
+        radial-gradient(ellipse at 40% 110%, rgba(255, 55, 190, .11), transparent 46%),
+        linear-gradient(145deg,
+            rgba(29, 24, 45, .43),
+            rgba(10, 10, 23, .39) 50%,
+            rgba(24, 17, 39, .45)
+        ) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(125%) !important;
+    backdrop-filter: blur(12px) saturate(125%) !important;
+    animation: none !important;
+    background-size: auto !important;
+    background-position: center !important;
+}
+
+/* Transparencia también en los paneles interiores. */
+.lyrics-container,
+.secondary-control,
+.lyrics-toggle,
+.visual-top-label {
+    -webkit-backdrop-filter: blur(7px) saturate(120%) !important;
+    backdrop-filter: blur(7px) saturate(120%) !important;
+}
+
+.lyrics-container {
+    background: linear-gradient(135deg,
+        rgba(94, 65, 145, .16),
+        rgba(14, 13, 27, .42)
+    ) !important;
+}
+
+/* El aviso de orientación ya no se muestra nunca. */
+.orientation-hint,
+.orientation-hint.is-visible {
+    display: none !important;
+}
+
+/* En móvil maximizado mantenemos visible el video de fondo.
+   El video se pausa desde JS para ahorrar decodificación, pero conserva su fotograma. */
+@media (max-width: 760px) {
+    .experience.is-fullscreen .background-video,
+    .experience:fullscreen .background-video {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .experience.is-fullscreen .background-container::before,
+    .experience:fullscreen .background-container::before {
+        display: block !important;
+        opacity: .38;
+        animation: none !important;
+    }
+
+    .experience.is-fullscreen .player-card,
+    .experience:fullscreen .player-card {
+        background:
+            radial-gradient(ellipse at 12% 8%, rgba(160, 75, 255, .16), transparent 44%),
+            radial-gradient(ellipse at 95% 40%, rgba(30, 205, 255, .12), transparent 46%),
+            linear-gradient(145deg, rgba(26, 22, 43, .43), rgba(9, 10, 22, .40)) !important;
+        -webkit-backdrop-filter: blur(9px) saturate(120%) !important;
+        backdrop-filter: blur(9px) saturate(120%) !important;
+    }
+}
+
+/* Horizontal: tarjeta compacta, no ocupa todo el ancho y deja ver el video alrededor. */
+@media (max-width: 900px) and (max-height: 600px) and (orientation: landscape) {
+    .experience.is-fullscreen .player-card,
+    .experience:fullscreen .player-card {
+        width: min(760px, 76vw) !important;
+        max-width: 76vw !important;
+        max-height: 88dvh !important;
+        top: 50% !important;
+        right: 50% !important;
+        bottom: auto !important;
+        left: auto !important;
+        padding: 9px 12px !important;
+        column-gap: 14px !important;
+        row-gap: 4px !important;
+        border-radius: 16px !important;
+        transform: translate(50%, -50%) !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 34px rgba(0, 0, 0, .25) !important;
+    }
+
+    .experience.is-fullscreen .player-visual,
+    .experience:fullscreen .player-visual {
+        height: 48dvh !important;
+        max-height: 48dvh !important;
+    }
+
+    .experience.is-fullscreen .player-header,
+    .experience:fullscreen .player-header {
+        min-height: 24px;
+    }
+
+    .experience.is-fullscreen .track-information,
+    .experience:fullscreen .track-information {
+        min-height: 0;
+    }
+
+    .experience.is-fullscreen .lyrics-container,
+    .experience:fullscreen .lyrics-container {
+        padding: 5px 8px !important;
+    }
+
+    .experience.is-fullscreen .lyrics-display,
+    .experience:fullscreen .lyrics-display {
+        min-height: 30px !important;
+    }
+
+    .experience.is-fullscreen .visualizer-section,
+    .experience:fullscreen .visualizer-section {
+        min-height: 22px;
+    }
+
+    .experience.is-fullscreen .player-footer,
+    .experience:fullscreen .player-footer {
+        min-height: 16px !important;
+    }
+}
+
+/* Teléfonos muy estrechos en horizontal: evita que la tarjeta corte controles. */
+@media (max-width: 680px) and (max-height: 430px) and (orientation: landscape) {
+    .experience.is-fullscreen .player-card,
+    .experience:fullscreen .player-card {
+        width: min(690px, 82vw) !important;
+        max-width: 82vw !important;
+        padding: 7px 9px !important;
+        column-gap: 9px !important;
+    }
+
+    .experience.is-fullscreen .player-visual,
+    .experience:fullscreen .player-visual {
+        height: 43dvh !important;
+        max-height: 43dvh !important;
+    }
+
+    .experience.is-fullscreen .track-text h1,
+    .experience:fullscreen .track-text h1 {
+        font-size: clamp(15px, 2.8vh, 21px) !important;
+    }
+}
+
+/* En pantallas táctiles reducimos el trabajo de filtros en controles pequeños. */
+@media (max-width: 760px) {
+    .player-card,
+    .lyrics-container,
+    .secondary-control,
+    .lyrics-toggle {
+        box-shadow: 0 7px 22px rgba(0, 0, 0, .16);
+    }
+
+    .player-card::before,
+    .player-card::after {
+        animation: none !important;
+    }
+}
