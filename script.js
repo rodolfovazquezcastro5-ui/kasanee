@@ -26,11 +26,11 @@ const CONFIG = {
     hardSyncTolerance: 0.35,
 
     // Menos trabajo de canvas en teléfonos; escritorio conserva su calidad.
-    visualizerFPS: window.matchMedia("(max-width: 760px)").matches ? 18 : 24,
-    visualizerBars: window.matchMedia("(max-width: 760px)").matches ? 28 : 48,
+    visualizerFPS: window.matchMedia("(max-width: 760px)").matches ? 14 : 24,
+    visualizerBars: window.matchMedia("(max-width: 760px)").matches ? 22 : 48,
     visualizerSensitivity: 1.35,
 
-    maxDpr: window.matchMedia("(max-width: 760px)").matches ? 1 : 1.25,
+    maxDpr: window.matchMedia("(max-width: 760px)").matches ? 0.9 : 1.25,
 
     lyricTransitionDuration: 650,
     lyricTypingMinSpeed: 18,
@@ -1959,54 +1959,12 @@ function isPortraitViewport() {
 }
 
 function ensureOrientationHint() {
-    if (orientationHint || !experienceRoot) return;
-
-    orientationHint = document.createElement("div");
-    orientationHint.className = "orientation-hint";
-    orientationHint.setAttribute("role", "status");
-    orientationHint.setAttribute("aria-live", "polite");
-
-    const panel = document.createElement("div");
-    panel.className = "orientation-hint-panel";
-
-    const icon = document.createElement("div");
-    icon.className = "orientation-hint-icon";
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = "↻";
-
-    const title = document.createElement("strong");
-    title.textContent = "Gira tu teléfono";
-
-    const message = document.createElement("span");
-    message.textContent = "ONEWAY se disfruta mejor en horizontal. Voltea tu celular para adaptar el reproductor.";
-
-    const dismiss = document.createElement("button");
-    dismiss.type = "button";
-    dismiss.className = "orientation-hint-dismiss";
-    dismiss.textContent = "Continuar en vertical";
-    dismiss.addEventListener("click", () => {
-        orientationDismissed = true;
-        orientationHint.classList.remove("is-visible");
-    });
-
-    panel.append(icon, title, message, dismiss);
-    orientationHint.append(panel);
-    experienceRoot.append(orientationHint);
+    // Se eliminó la tarjeta superior de orientación; el giro se intenta en silencio.
 }
 
 function refreshOrientationHint() {
-    if (!experienceRoot) return;
-
-    const shouldPrompt =
-        experienceRoot.classList.contains("is-fullscreen") &&
-        isMobileViewport() &&
-        isPortraitViewport() &&
-        !orientationDismissed;
-
-    if (shouldPrompt) ensureOrientationHint();
-    if (orientationHint) {
-        orientationHint.classList.toggle("is-visible", shouldPrompt);
-    }
+    // No mostrar mensajes ni overlays al maximizar en móvil.
+    if (orientationHint) orientationHint.classList.remove("is-visible");
 }
 
 async function requestLandscapeIfPossible() {
