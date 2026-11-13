@@ -1300,94 +1300,91 @@ function updateLyrics(force = false) {
 function animateLyrics() {
 
     const display = elements.lyricsDisplay;
-
     const currentElement = elements.currentLyric;
+
+    if (!display || !currentElement) return;
 
     clearTimeout(state.lyricTransitionTimer);
 
+    // Reinicia las clases para que cada frase vuelva a animarse.
     display.classList.remove("is-transitioning");
-
     currentElement.classList.remove("typing-active");
 
     const index = state.lyricIndex;
-
     const current = state.lyrics[index];
-
     const next = state.lyrics[index + 1];
-
     const text = currentElement.textContent || "";
 
-    // Si todavía no hay letra, mostramos el texto normal.
+    // Antes de la primera frase o cuando no hay texto sincronizado.
     if (!current || index < 0 || !text || text === "♪") {
-
-        currentElement.textContent = text;
-
+        currentElement.textContent = text || "♪";
         display.classList.add("is-transitioning");
-
         return;
-
     }
 
-    // Tiempo transcurrido desde que comenzó la frase.
-    // Tiempo disponible antes de la siguiente frase.
-const remainingTime = next
-    ? Math.max(500, (next.time - elements.audio.currentTime) * 1000)
-    : 4000;
+    // IMPORTANTE: Array.from evita separar incorrectamente emojis
+    // y caracteres Unicode. Esta variable faltaba en la versión anterior.
+    const characters = Array.from(text);
 
-    // Separamos el texto en caracteres Unicode.
+    if (characters.length === 0) {
+        currentElement.textContent = "";
+        return;
+    }
+
+    // Calcula cuánto tiempo queda hasta la siguiente línea.
+    // Si no hay otra línea, usa una duración cómoda para revelar el texto.
+    const remainingTime = next
+        ? Math.max(250, (next.time - elements.audio.currentTime) * 1000)
+        : 4000;
+
+    // Revela la frase dentro de una parte del intervalo disponible.
+    // El límite evita que frases largas tarden demasiado en aparecer.
+    const typingWindow = Math.min(
+        4000,
+        Math.max(350, remainingTime * CONFIG.lyricTypingWindow)
+    );
+
     const characterDelay = clamp(
-    (remainingTime * 0.68) /
-        Math.max(characters.length, 1),
-    CONFIG.lyricTypingMinSpeed,
-    CONFIG.lyricTypingMaxSpeed
-);
+        typingWindow / Math.max(characters.length, 1),
+        CONFIG.lyricTypingMinSpeed,
+        CONFIG.lyricTypingMaxSpeed
+    );
 
     const fragment = document.createDocumentFragment();
 
     characters.forEach((character, i) => {
-
         const span = document.createElement("span");
 
         span.className = "lyric-character";
+        span.textContent = character === " " ? "\u00A0" : character;
 
-        span.textContent = character === " "
-            ? "\u00A0"
-            : character;
-
-        // Ajuste según el tiempo real de reproducción.
-        const delay = i * characterDelay;
-
-        span.style.setProperty(
-            "--char-delay",
-            `${delay}ms`
-        );
-
+        span.style.setProperty("--char-delay", `${i * characterDelay}ms`);
         span.style.setProperty(
             "--char-duration",
             `${CONFIG.lyricCharacterDuration}ms`
         );
 
         fragment.appendChild(span);
-
     });
 
-    // Insertamos todos los caracteres de una sola vez.
+    // Sustituye el contenido en una sola operación.
     currentElement.replaceChildren(fragment);
 
-    // Reiniciamos la transición visual.
-    display.classList.remove("is-transitioning");
-
+    // Fuerza el reinicio de la animación CSS en cada nueva frase.
+    void currentElement.offsetWidth;
     void display.offsetWidth;
 
     display.classList.add("is-transitioning");
-
     currentElement.classList.add("typing-active");
 
+    // La clase se mantiene durante toda la secuencia de escritura.
+    const totalTypingTime =
+        (characters.length - 1) * characterDelay +
+        CONFIG.lyricCharacterDuration;
+
     state.lyricTransitionTimer = setTimeout(() => {
-
         currentElement.classList.remove("typing-active");
-
-    }, CONFIG.lyricTransitionDuration);
+    }, totalTypingTime + 80);
 
 }
 
