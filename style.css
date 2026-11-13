@@ -2758,3 +2758,188 @@ input:focus-visible {
         animation: none !important;
     }
 }
+
+
+
+
+/* ============================================================
+   ONEWAY — MOBILE FULLSCREEN REFINEMENT
+   Solo modifica móviles; el fullscreen de escritorio permanece intacto.
+   ============================================================ */
+
+@media (max-width: 760px) {
+    /* Más transparencia para que el video de fondo siga siendo protagonista. */
+    .experience.is-fullscreen .player-card,
+    .experience:fullscreen .player-card {
+        background:
+            radial-gradient(ellipse at 12% 0%, rgba(157, 91, 255, .16), transparent 48%),
+            radial-gradient(ellipse at 100% 30%, rgba(42, 193, 255, .11), transparent 50%),
+            linear-gradient(145deg, rgba(23, 19, 39, .48), rgba(8, 9, 20, .42) 58%, rgba(23, 14, 34, .48)) !important;
+        -webkit-backdrop-filter: blur(9px) saturate(130%) !important;
+        backdrop-filter: blur(9px) saturate(130%) !important;
+        border-color: rgba(225, 210, 255, .17) !important;
+        box-shadow:
+            0 14px 38px rgba(0, 0, 0, .25),
+            inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+    }
+
+    .experience.is-fullscreen .lyrics-container,
+    .experience:fullscreen .lyrics-container {
+        background: rgba(17, 14, 31, .38) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+        backdrop-filter: blur(5px) !important;
+        border-color: rgba(225, 210, 255, .12) !important;
+    }
+
+    .experience.is-fullscreen .secondary-control,
+    .experience:fullscreen .secondary-control,
+    .experience.is-fullscreen .lyrics-toggle,
+    .experience:fullscreen .lyrics-toggle,
+    .experience.is-fullscreen .fullscreen-toggle,
+    .experience:fullscreen .fullscreen-toggle {
+        background: rgba(255, 255, 255, .075) !important;
+        -webkit-backdrop-filter: blur(5px) !important;
+        backdrop-filter: blur(5px) !important;
+    }
+}
+
+/* En vertical: tarjeta más compacta y con más superficie de video visible. */
+@media (max-width: 760px) and (orientation: portrait) {
+    .experience.is-fullscreen .player-card,
+    .experience:fullscreen .player-card {
+        width: min(405px, calc(100vw - 42px));
+        max-height: min(76dvh, 690px);
+        bottom: max(12px, env(safe-area-inset-bottom));
+        padding: 12px 13px;
+        gap: 8px;
+        border-radius: 20px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(210, 190, 255, .25) transparent;
+    }
+
+    .experience.is-fullscreen .player-header,
+    .experience:fullscreen .player-header {
+        min-height: 30px;
+    }
+
+    .experience.is-fullscreen .player-visual,
+    .experience:fullscreen .player-visual {
+        min-height: clamp(88px, 14dvh, 132px);
+        height: clamp(88px, 14dvh, 132px);
+        max-height: 17dvh;
+        border-radius: 14px;
+    }
+
+    .experience.is-fullscreen .track-information,
+    .experience:fullscreen .track-information {
+        padding-top: 1px;
+        padding-bottom: 0;
+    }
+
+    .experience.is-fullscreen .track-text h1,
+    .experience:fullscreen .track-text h1 {
+        font-size: clamp(19px, 5.2vw, 23px);
+        line-height: 1.05;
+    }
+
+    .experience.is-fullscreen .track-text p,
+    .experience:fullscreen .track-text p {
+        margin-top: 3px;
+        font-size: 11px;
+    }
+
+    .experience.is-fullscreen .lyrics-container,
+    .experience:fullscreen .lyrics-container {
+        padding: 8px 10px;
+        border-radius: 13px;
+    }
+
+    .experience.is-fullscreen .lyrics-heading,
+    .experience:fullscreen .lyrics-heading {
+        margin-bottom: 3px;
+    }
+
+    .experience.is-fullscreen .lyrics-display,
+    .experience:fullscreen .lyrics-display {
+        min-height: 38px;
+    }
+
+    .experience.is-fullscreen .current-lyric,
+    .experience:fullscreen .current-lyric {
+        font-size: clamp(13px, 3.6vw, 16px);
+        line-height: 1.25;
+    }
+
+    .experience.is-fullscreen .previous-lyric,
+    .experience:fullscreen .previous-lyric,
+    .experience.is-fullscreen .next-lyric,
+    .experience:fullscreen .next-lyric {
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .experience.is-fullscreen .visualizer-section,
+    .experience:fullscreen .visualizer-section {
+        margin-top: -3px;
+    }
+
+    .experience.is-fullscreen .visualizer-container,
+    .experience:fullscreen .visualizer-container {
+        height: 24px;
+        min-height: 24px;
+    }
+
+    .experience.is-fullscreen .playback-section,
+    .experience:fullscreen .playback-section {
+        margin-top: -1px;
+    }
+
+    .experience.is-fullscreen .player-controls,
+    .experience:fullscreen .player-controls {
+        gap: 24px;
+        margin-top: -1px;
+    }
+
+    .experience.is-fullscreen .play-button,
+    .experience:fullscreen .play-button {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+    }
+
+    .experience.is-fullscreen .secondary-control,
+    .experience:fullscreen .secondary-control {
+        width: 35px;
+        height: 35px;
+    }
+
+    .experience.is-fullscreen .player-footer,
+    .experience:fullscreen .player-footer {
+        min-height: 24px;
+        margin-top: -1px;
+    }
+}
+
+/* Móviles muy pequeños: compacta un poco más sin ocultar controles. */
+@media (max-width: 390px) and (orientation: portrait) {
+    .experience.is-fullscreen .player-card,
+    .experience:fullscreen .player-card {
+        width: calc(100vw - 34px);
+        max-height: 73dvh;
+        padding: 10px 11px;
+        gap: 7px;
+    }
+
+    .experience.is-fullscreen .player-visual,
+    .experience:fullscreen .player-visual {
+        min-height: 82px;
+        height: 12.5dvh;
+        max-height: 112px;
+    }
+
+    .experience.is-fullscreen .player-controls,
+    .experience:fullscreen .player-controls {
+        gap: 20px;
+    }
+}
