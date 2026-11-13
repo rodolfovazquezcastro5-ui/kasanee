@@ -25,11 +25,12 @@ const CONFIG = {
     syncTolerance: 0.065,
     hardSyncTolerance: 0.35,
 
-    visualizerFPS: 24,
-    visualizerBars: 48,
+    // Menos trabajo de canvas en teléfonos; escritorio conserva su calidad.
+    visualizerFPS: window.matchMedia("(max-width: 760px)").matches ? 18 : 24,
+    visualizerBars: window.matchMedia("(max-width: 760px)").matches ? 28 : 48,
     visualizerSensitivity: 1.35,
 
-    maxDpr: 1.25,
+    maxDpr: window.matchMedia("(max-width: 760px)").matches ? 1 : 1.25,
 
     lyricTransitionDuration: 650,
     lyricTypingMinSpeed: 18,
@@ -128,6 +129,10 @@ const state = {
     lyricTransitionTimer: null,
 
     secondaryVideoStarted: false,
+
+    // En fullscreen móvil pausamos el video de fondo para evitar decodificar
+    // dos videos simultáneamente. El video principal del reproductor sigue activo.
+    mobileFullscreen: false,
 
     destroyed: false
 
@@ -354,6 +359,7 @@ async function playMusic() {
         await elements.audio.play();
 
         if (
+            !state.mobileFullscreen &&
             elements.background.readyState >= 2 &&
             !elements.background.ended
         ) {
@@ -554,6 +560,7 @@ function synchronizeBackground(force = false) {
     const audio = elements.audio;
     const video = elements.background;
 
+    if (state.mobileFullscreen) return;
     if (!video || !Number.isFinite(audio.currentTime)) return;
 
     if (video.readyState < 1 || video.seeking) return;
@@ -621,7 +628,7 @@ function synchronizeBackground(force = false) {
 
 function synchronizeBackgroundPlayback() {
 
-    if (!state.playing) return;
+    if (!state.playing || state.mobileFullscreen) return;
 
     const video = elements.background;
 
@@ -671,7 +678,7 @@ elements.background.addEventListener("loadedmetadata", () => {
 });
 
 
-function backgroundSyncLoop(timestamp) {
+function backgroundSyncLoop() {
 
     state.backgroundSyncFrame = null;
 
@@ -683,20 +690,17 @@ function backgroundSyncLoop(timestamp) {
         return;
     }
 
-    if (timestamp - state.syncLastTime >= CONFIG.syncInterval) {
-
+    // No se ejecuta un requestAnimationFrame a 60 Hz para una tarea que solo
+    // necesita sincronizarse cada ~650 ms.
+    if (!state.mobileFullscreen) {
         synchronizeBackground();
         synchronizeBackgroundPlayback();
-
-        state.syncLastTime = timestamp;
-
     }
 
     state.backgroundSyncFrame =
-        requestAnimationFrame(backgroundSyncLoop);
+        window.setTimeout(backgroundSyncLoop, CONFIG.syncInterval);
 
 }
-
 
 function startBackgroundSync() {
 
@@ -712,7 +716,7 @@ function startBackgroundSync() {
     state.syncLastTime = 0;
 
     state.backgroundSyncFrame =
-        requestAnimationFrame(backgroundSyncLoop);
+        window.setTimeout(backgroundSyncLoop, CONFIG.syncInterval);
 
 }
 
@@ -721,7 +725,7 @@ function stopBackgroundSync() {
 
     if (state.backgroundSyncFrame !== null) {
 
-        cancelAnimationFrame(state.backgroundSyncFrame);
+        window.clearTimeout(state.backgroundSyncFrame);
 
         state.backgroundSyncFrame = null;
 
@@ -1697,7 +1701,7 @@ document.addEventListener("visibilitychange", () => {
 
         synchronizeBackground(true);
 
-        if (elements.background.readyState >= 2) {
+        if (!state.mobileFullscreen && elements.background.readyState >= 2) {
             elements.background.play().catch(() => {});
         }
 
@@ -1942,6 +1946,90 @@ if (document.readyState === "loading") {
 
 const fullscreenButton = document.getElementById("fullscreenToggle");
 const experienceRoot = document.getElementById("experience");
+let orientationHint = null;
+let orientationDismissed = false;
+let orientationLockAttempted = false;
+
+function isMobileViewport() {
+    return window.matchMedia("(max-width: 760px)").matches;
+}
+
+function isPortraitViewport() {
+    return window.matchMedia("(orientation: portrait)").matches;
+}
+
+function ensureOrientationHint() {
+    if (orientationHint || !experienceRoot) return;
+
+    orientationHint = document.createElement("div");
+    orientationHint.className = "orientation-hint";
+    orientationHint.setAttribute("role", "status");
+    orientationHint.setAttribute("aria-live", "polite");
+
+    const panel = document.createElement("div");
+    panel.className = "orientation-hint-panel";
+
+    const icon = document.createElement("div");
+    icon.className = "orientation-hint-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "↻";
+
+    const title = document.createElement("strong");
+    title.textContent = "Gira tu teléfono";
+
+    const message = document.createElement("span");
+    message.textContent = "ONEWAY se disfruta mejor en horizontal. Voltea tu celular para adaptar el reproductor.";
+
+    const dismiss = document.createElement("button");
+    dismiss.type = "button";
+    dismiss.className = "orientation-hint-dismiss";
+    dismiss.textContent = "Continuar en vertical";
+    dismiss.addEventListener("click", () => {
+        orientationDismissed = true;
+        orientationHint.classList.remove("is-visible");
+    });
+
+    panel.append(icon, title, message, dismiss);
+    orientationHint.append(panel);
+    experienceRoot.append(orientationHint);
+}
+
+function refreshOrientationHint() {
+    if (!experienceRoot) return;
+
+    const shouldPrompt =
+        experienceRoot.classList.contains("is-fullscreen") &&
+        isMobileViewport() &&
+        isPortraitViewport() &&
+        !orientationDismissed;
+
+    if (shouldPrompt) ensureOrientationHint();
+    if (orientationHint) {
+        orientationHint.classList.toggle("is-visible", shouldPrompt);
+    }
+}
+
+async function requestLandscapeIfPossible() {
+    if (!isMobileViewport() || !isPortraitViewport()) {
+        refreshOrientationHint();
+        return;
+    }
+
+    if (!orientationLockAttempted) {
+        orientationLockAttempted = true;
+        try {
+            if (screen.orientation && typeof screen.orientation.lock === "function") {
+                await screen.orientation.lock("landscape");
+                refreshOrientationHint();
+                return;
+            }
+        } catch (error) {
+            // iOS Safari y varios navegadores no permiten bloquear orientación.
+        }
+    }
+
+    refreshOrientationHint();
+}
 
 function isExperienceFullscreen() {
     return document.fullscreenElement === experienceRoot ||
@@ -1952,6 +2040,23 @@ function updateFullscreenUI(active) {
     if (!fullscreenButton || !experienceRoot) return;
 
     experienceRoot.classList.toggle("is-fullscreen", active);
+    state.mobileFullscreen = active && isMobileViewport();
+
+    if (state.mobileFullscreen) {
+        // Pausar el segundo flujo de video libera bastante GPU/decodificación.
+        if (elements.background) elements.background.pause();
+    } else if (!active) {
+        orientationDismissed = false;
+        orientationLockAttempted = false;
+        if (screen.orientation && typeof screen.orientation.unlock === "function") {
+            try { screen.orientation.unlock(); } catch (error) {}
+        }
+        if (state.playing && elements.background && elements.background.readyState >= 2) {
+            synchronizeBackground(true);
+            elements.background.play().catch(() => {});
+        }
+    }
+
     fullscreenButton.setAttribute("aria-pressed", String(active));
     fullscreenButton.setAttribute(
         "aria-label",
@@ -1965,6 +2070,8 @@ function updateFullscreenUI(active) {
     if (typeof resizeVisualizer === "function") {
         requestAnimationFrame(() => resizeVisualizer());
     }
+
+    refreshOrientationHint();
 }
 
 async function toggleExperienceFullscreen() {
@@ -1997,13 +2104,19 @@ async function toggleExperienceFullscreen() {
             updateFullscreenUI(true);
         }
     }
+
+    // Se intenta girar automáticamente; si el navegador no lo permite,
+    // aparece una indicación para que la persona gire el teléfono.
+    await requestLandscapeIfPossible();
 }
 
 if (fullscreenButton && experienceRoot) {
     fullscreenButton.addEventListener("click", toggleExperienceFullscreen);
 
     document.addEventListener("fullscreenchange", () => {
-        updateFullscreenUI(document.fullscreenElement === experienceRoot);
+        const active = document.fullscreenElement === experienceRoot;
+        updateFullscreenUI(active);
+        if (active) requestLandscapeIfPossible();
     });
 
     document.addEventListener("keydown", (event) => {
@@ -2013,9 +2126,16 @@ if (fullscreenButton && experienceRoot) {
         }
     });
 
-    window.addEventListener("resize", () => {
+    const handleViewportChange = () => {
+        refreshOrientationHint();
         if (experienceRoot.classList.contains("is-fullscreen")) {
             if (typeof resizeVisualizer === "function") resizeVisualizer();
         }
-    }, { passive: true });
+    };
+
+    window.addEventListener("resize", handleViewportChange, { passive: true });
+    window.addEventListener("orientationchange", handleViewportChange, { passive: true });
+    if (screen.orientation && screen.orientation.addEventListener) {
+        screen.orientation.addEventListener("change", handleViewportChange);
+    }
 }
