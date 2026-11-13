@@ -1931,3 +1931,91 @@ if (document.readyState === "loading") {
     initializeONEWAY();
 
 }
+
+
+
+/* ============================================================
+   26. ADAPTIVE FULLSCREEN / MAXIMIZE
+   Pantalla completa real cuando el navegador lo permite.
+   Fallback visual para navegadores móviles sin Fullscreen API.
+============================================================ */
+
+const fullscreenButton = document.getElementById("fullscreenToggle");
+const experienceRoot = document.getElementById("experience");
+
+function isExperienceFullscreen() {
+    return document.fullscreenElement === experienceRoot ||
+        experienceRoot.classList.contains("is-fullscreen");
+}
+
+function updateFullscreenUI(active) {
+    if (!fullscreenButton || !experienceRoot) return;
+
+    experienceRoot.classList.toggle("is-fullscreen", active);
+    fullscreenButton.setAttribute("aria-pressed", String(active));
+    fullscreenButton.setAttribute(
+        "aria-label",
+        active ? "Salir de pantalla completa" : "Activar pantalla completa"
+    );
+    fullscreenButton.title = active
+        ? "Salir de pantalla completa"
+        : "Maximizar pantalla";
+
+    // Recalcula el canvas tras cambiar el tamaño del reproductor.
+    if (typeof resizeVisualizer === "function") {
+        requestAnimationFrame(() => resizeVisualizer());
+    }
+}
+
+async function toggleExperienceFullscreen() {
+    if (!experienceRoot || !fullscreenButton) return;
+
+    const active = isExperienceFullscreen();
+
+    if (active) {
+        if (document.fullscreenElement && document.exitFullscreen) {
+            try {
+                await document.exitFullscreen();
+            } catch (error) {
+                console.warn("ONEWAY: no se pudo salir del modo nativo.", error);
+            }
+        }
+        updateFullscreenUI(false);
+        return;
+    }
+
+    // Primero se activa el layout para que el fallback también funcione.
+    updateFullscreenUI(true);
+
+    if (experienceRoot.requestFullscreen) {
+        try {
+            await experienceRoot.requestFullscreen({ navigationUI: "hide" });
+        } catch (error) {
+            // Algunos navegadores móviles bloquean fullscreen para elementos.
+            // Se conserva el modo expandido dentro del viewport.
+            console.info("ONEWAY: usando maximizado adaptable del navegador.", error);
+            updateFullscreenUI(true);
+        }
+    }
+}
+
+if (fullscreenButton && experienceRoot) {
+    fullscreenButton.addEventListener("click", toggleExperienceFullscreen);
+
+    document.addEventListener("fullscreenchange", () => {
+        updateFullscreenUI(document.fullscreenElement === experienceRoot);
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && experienceRoot.classList.contains("is-fullscreen")) {
+            // Si el navegador no ofrece Fullscreen API, Escape cierra el fallback.
+            if (!document.fullscreenElement) updateFullscreenUI(false);
+        }
+    });
+
+    window.addEventListener("resize", () => {
+        if (experienceRoot.classList.contains("is-fullscreen")) {
+            if (typeof resizeVisualizer === "function") resizeVisualizer();
+        }
+    }, { passive: true });
+}
