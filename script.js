@@ -1329,28 +1329,18 @@ function animateLyrics() {
     }
 
     // Tiempo transcurrido desde que comenzó la frase.
-    const audioTime = elements.audio.currentTime;
-
-    const elapsed = Math.max(
-        0,
-        (audioTime - current.time) * 1000
-    );
-
     // Tiempo disponible antes de la siguiente frase.
-    const availableTime = next
-        ? Math.max(0, (next.time - current.time) * 1000)
-        : 4000;
+const remainingTime = next
+    ? Math.max(500, (next.time - elements.audio.currentTime) * 1000)
+    : 4000;
 
     // Separamos el texto en caracteres Unicode.
-    const characters = Array.from(text);
-
-    // Calculamos la velocidad de aparición.
     const characterDelay = clamp(
-        (availableTime * CONFIG.lyricTypingWindow) /
-            Math.max(characters.length, 1),
-        CONFIG.lyricTypingMinSpeed,
-        CONFIG.lyricTypingMaxSpeed
-    );
+    (remainingTime * 0.68) /
+        Math.max(characters.length, 1),
+    CONFIG.lyricTypingMinSpeed,
+    CONFIG.lyricTypingMaxSpeed
+);
 
     const fragment = document.createDocumentFragment();
 
@@ -1365,7 +1355,7 @@ function animateLyrics() {
             : character;
 
         // Ajuste según el tiempo real de reproducción.
-        const delay = (i * characterDelay) - elapsed;
+        const delay = i * characterDelay;
 
         span.style.setProperty(
             "--char-delay",
