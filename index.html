@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#090810">
+
+    <meta name="description" content=" - Cinematic Music Experience">
+
+    <title> | Music Experience</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+       BACKGROUND VIDEO
+   ====================================================== -->
+
+<main class="experience" id="experience">
+
+    <div class="background-container">
+
+        <video
+            id="backgroundVideo"
+            class="background-video"
+            muted
+            playsinline
+            preload="metadata"
+            disablepictureinpicture
+        >
+
+            <source src="https://res.cloudinary.com/d2xvi4sx/video/upload/v1794538772/videodefondo.mp4" type="video/mp4">
+
+        </video>
+
+    </div>
+
+    <!-- ATMOSPHERIC OVERLAYS -->
+
+    <div class="background-overlay"></div>
+
+    <div class="background-vignette"></div>
+
+    <div class="background-grain"></div>
+
+        <!-- =================================================
+             AMBIENT INTERFACE
+        ================================================== -->
+
+        <div class="ambient-interface">
+
+            <div class="ambient-brand">
+
+                <span class="brand-symbol">𝘒</span>
+
+                <span class="brand-name">
+
+
+
+
+
+
+
+
+
+
+
+
+飛行手紙 (Letterplane) feat. 重音テト</span>
+
+            </div>
+
+
+            <div class="ambient-indicator">
+
+                <span class="ambient-indicator-dot"></span>
+
+                <span>IMMERSIVE AUDIO</span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MAIN MUSIC PLAYER
+        ================================================== -->
+
+        <section
+            class="player-card"
+            id="playerCard"
+            aria-label="Reproductor musical"
+        >
+
+
+            <!-- PLAYER HEADER -->
+
+            <header class="player-header">
+
+                <div class="player-header-left">
+
+                    <span class="player-header-indicator"></span>
+
+                    <span class="player-header-label">
+                        Kasane Teto
+                    </span>
+
+                </div>
+
+
+                <button
+                    class="lyrics-toggle"
+                    id="lyricsToggle"
+                    type="button"
+                    aria-label="Ocultar letras"
+                    title="Mostrar u ocultar letras"
+                >
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path
+                            d="M4 6H20M4 12H20M4 18H14"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                        />
+
+                    </svg>
+
+                </button>
+
+            </header>
+
+
+
+            <!-- =================================================
+                 SECONDARY VIDEO
+            ================================================== -->
+
+            <div class="player-visual">
+
+                <video
+                    id="musicVideo"
+                    class="music-video"
+                    muted
+                    loop
+                    playsinline
+                    autoplay
+                    preload="auto"
+                    disablepictureinpicture
+                >
+
+                    <source src="tettorecuadro.mp4" type="video/mp4">
+
+                </video>
+
+
+                <div class="visual-overlay"></div>
+
+
+                <!-- VISUAL VIDEO DETAILS -->
+
+                <div class="visual-top-label">
+
+                    <span class="visual-live-dot"></span>
+
+                    <span>VISUAL</span>
+
+                </div>
+
+
+                <div class="visual-bottom">
+
+                    <div class="visual-equalizer" aria-hidden="true">
+
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+
+                    </div>
+
+                    <span class="visual-bottom-text">
+                        
+                    </span>
+
+                </div>
+
+
+                <!-- PLAYBACK INDICATOR -->
+
+                <div
+                    class="visual-play-indicator"
+                    id="visualPlayIndicator"
+                    aria-hidden="true"
+                >
+
+                    <div class="visual-play-icon">
+
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+
+                            <path d="M8 5.5V18.5L19 12L8 5.5Z"/>
+
+                        </svg>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 TRACK INFORMATION
+            ================================================== -->
+
+            <div class="track-information">
+
+                <div class="track-main">
+
+                    <div class="track-text">
+
+                        <h1 id="trackTitle">
+                            TETO
+                        </h1>
+
+                        <p id="trackArtist">
+                            𝓑𝔂 𝓡
+                        </p>
+
+                    </div>
+
+
+                    <div class="track-decoration">
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path
+                                d="M12 3L14.4 9.6L21 12L14.4 14.4L12 21L9.6 14.4L3 12L9.6 9.6L12 3Z"
+                                stroke="currentColor"
+                                stroke-width="1.3"
+                                stroke-linejoin="round"
+                            />
+
+                        </svg>
+
+                    </div>
+
+                </div>
+
+
+                <div class="track-subinformation">
+
+                    <span class="track-subtitle">
+                        
+                    </span>
+
+                    <span class="track-quality">
+                        
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 LYRICS DISPLAY
+            ================================================== -->
+
+            <section
+                class="lyrics-container"
+                id="lyricsContainer"
+                aria-label="Letras sincronizadas"
+            >
+
+                <div class="lyrics-heading">
+
+                    <span class="lyrics-heading-title">
+                        LYRICS
+                    </span>
+
+                    <span
+                        class="lyrics-status"
+                        id="lyricsStatus"
+                    >
+                        LOADING LYRICS
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="lyrics-display"
+                    id="lyricsDisplay"
+                    aria-live="off"
+                >
+
+                    <p
+                        class="lyric-line previous-lyric"
+                        id="previousLyric"
+                    ></p>
+
+
+                    <p
+                        class="lyric-line current-lyric"
+                        id="currentLyric"
+                    >
+                        ♪
+                    </p>
+
+
+                    <p
+                        class="lyric-line next-lyric"
+                        id="nextLyric"
+                    ></p>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 AUDIO VISUALIZER
+            ================================================== -->
+
+            <div class="visualizer-section">
+
+                <div class="visualizer-header">
+
+                    <span class="visualizer-label">
+                        
+                    </span>
+
+                    <span
+                        class="visualizer-state"
+                        id="visualizerState"
+                    >
+                        
+                    </span>
+
+                </div>
+
+
+                <div class="visualizer-container">
+
+                    <canvas
+                        id="audioVisualizer"
+                        class="audio-visualizer"
+                        aria-label="Visualizador de frecuencias de audio"
+                    ></canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 PROGRESS BAR
+            ================================================== -->
+
+            <div class="playback-section">
+
+
+                <div
+                    class="progress-track"
+                    id="progressTrack"
+                    role="slider"
+                    tabindex="0"
+                    aria-label="Posición de reproducción"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                >
+
+                    <div
+                        class="progress-fill"
+                        id="progressFill"
+                    ></div>
+
+                    <div
+                        class="progress-thumb"
+                        id="progressThumb"
+                    ></div>
+
+                </div>
+
+
+                <div class="time-information">
+
+                    <span id="currentTime">
+                        00:00
+                    </span>
+
+                    <span id="duration">
+                        00:00
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 PLAYBACK CONTROLS
+            ================================================== -->
+
+            <div class="player-controls">
+
+
+                <!-- PREVIOUS / BACKWARD -->
+
+                <button
+                    class="secondary-control"
+                    id="backwardButton"
+                    type="button"
+                    aria-label="Retroceder 10 segundos"
+                    title="Retroceder 10 segundos"
+                >
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path
+                            d="M11 5L3 12L11 19V5Z"
+                            fill="currentColor"
+                        />
+
+                        <path
+                            d="M20 5L12 12L20 19V5Z"
+                            fill="currentColor"
+                        />
+
+                    </svg>
+
+                    <span class="control-time">
+                        10
+                    </span>
+
+                </button>
+
+
+
+                <!-- MAIN PLAY BUTTON -->
+
+                <button
+                    class="play-button"
+                    id="playButton"
+                    type="button"
+                    aria-label="Reproducir"
+                    title="Reproducir"
+                >
+
+                    <svg
+                        id="playIcon"
+                        class="play-icon"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+
+                        <path d="M8 5.5V18.5L19 12L8 5.5Z"/>
+
+                    </svg>
+
+
+                    <svg
+                        id="pauseIcon"
+                        class="pause-icon"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+
+                        <rect
+                            x="6"
+                            y="5"
+                            width="4"
+                            height="14"
+                            rx="1"
+                        />
+
+                        <rect
+                            x="14"
+                            y="5"
+                            width="4"
+                            height="14"
+                            rx="1"
+                        />
+
+                    </svg>
+
+                </button>
+
+
+
+                <!-- FORWARD -->
+
+                <button
+                    class="secondary-control"
+                    id="forwardButton"
+                    type="button"
+                    aria-label="Adelantar 10 segundos"
+                    title="Adelantar 10 segundos"
+                >
+
+                    <svg viewBox="0 0 24 24" fill="none">
+
+                        <path
+                            d="M13 5L21 12L13 19V5Z"
+                            fill="currentColor"
+                        />
+
+                        <path
+                            d="M4 5L12 12L4 19V5Z"
+                            fill="currentColor"
+                        />
+
+                    </svg>
+
+                    <span class="control-time">
+                        10
+                    </span>
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 VOLUME AND PLAYER FOOTER
+            ================================================== -->
+
+            <footer class="player-footer">
+
+
+                <div class="volume-control">
+
+                    <button
+                        class="mute-button"
+                        id="muteButton"
+                        type="button"
+                        aria-label="Silenciar"
+                        title="Silenciar"
+                    >
+
+                        <svg viewBox="0 0 24 24" fill="none">
+
+                            <path
+                                d="M4 10V14H8L13 18V6L8 10H4Z"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linejoin="round"
+                            />
+
+                            <path
+                                d="M17 9C18.5 10.5 18.5 13.5 17 15"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                            />
+
+                            <path
+                                d="M19 6C22 9 22 15 19 18"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                            />
+
+                        </svg>
+
+                    </button>
+
+
+                    <input
+                        type="range"
+                        id="volumeSlider"
+                        class="volume-slider"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value="0.8"
+                        aria-label="Volumen"
+                    />
+
+                </div>
+
+
+                <div class="playback-status">
+
+                    <span
+                        class="playback-status-dot"
+                        id="playbackStatusDot"
+                    ></span>
+
+                    <span id="playbackStatus">
+                        READY TO PLAY
+                    </span>
+
+                </div>
+
+
+            </footer>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             AUDIO ELEMENT
+        ================================================== -->
+
+        <audio
+            id="audioPlayer"
+            preload="metadata"
+        >
+
+            <source src="musicatetto.mp3" type="audio/mpeg">
+
+        </audio>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="script.js" defer></script>
+
+
+</body>
+
+</html>
