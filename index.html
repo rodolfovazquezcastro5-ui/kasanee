@@ -6,7 +6,7 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     <meta name="theme-color" content="#090810">
 
@@ -20,7 +20,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
 
 </head>
 
@@ -125,9 +125,10 @@
                 </div>
 
 
-                <button
-                    class="lyrics-toggle"
-                    id="lyricsToggle"
+                <div class="player-header-actions">
+                    <button
+                        class="lyrics-toggle"
+                        id="lyricsToggle"
                     type="button"
                     aria-label="Ocultar letras"
                     title="Mostrar u ocultar letras"
@@ -145,6 +146,25 @@
                     </svg>
 
                 </button>
+
+                    <button
+                        class="fullscreen-toggle"
+                        id="fullscreenToggle"
+                        type="button"
+                        aria-label="Activar pantalla completa"
+                        aria-pressed="false"
+                        title="Maximizar pantalla"
+                    >
+                        <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"
+                                stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                        <svg class="fullscreen-exit-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M8 3v5H3M16 3v5h5M21 16h-5v5M3 16h5v5"
+                                stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
 
             </header>
 
@@ -652,7 +672,7 @@
          JAVASCRIPT
     ====================================================== -->
 
-    <script src="script.js?v=3" defer></script>
+    <script src="script.js?v=4" defer></script>
 
 
 </body>
