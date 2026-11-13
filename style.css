@@ -2171,3 +2171,108 @@ input:focus-visible {
         transition-duration: .01ms !important;
     }
 }
+
+/* =====================================================
+   LYRICS EXPERIENCE — SPOTIFY STYLE
+   Entrada cinematográfica + escritura progresiva
+   Optimizado: sin blur, filtros ni partículas
+===================================================== */
+
+/* Contenedor de letras */
+#lyricsDisplay {
+    perspective: 700px;
+}
+
+/* Entrada de la frase completa */
+#lyricsDisplay.is-transitioning .current-lyric,
+#lyricsDisplay.is-transitioning #currentLyric {
+    animation: spotifyLyricEntrance 650ms
+        cubic-bezier(.16, 1, .3, 1) both;
+}
+
+/* Entrada de cada carácter */
+#lyricsDisplay .lyric-character {
+    display: inline-block !important;
+    opacity: 0;
+    transform: translate3d(0, 13px, 0) scale(.96);
+
+    animation-name: spotifyCharacterReveal !important;
+    animation-duration: var(--char-duration, 260ms) !important;
+    animation-delay: var(--char-delay, 0ms) !important;
+    animation-timing-function:
+        cubic-bezier(.16, 1, .3, 1) !important;
+    animation-fill-mode: both !important;
+    animation-iteration-count: 1 !important;
+}
+
+/* Aparición suave de la frase */
+@keyframes spotifyLyricEntrance {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 24px, 0) scale(.97);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+/* Escritura carácter por carácter */
+@keyframes spotifyCharacterReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 13px, 0) scale(.96);
+    }
+
+    65% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+/* Entrada de las líneas secundarias */
+#lyricsDisplay.is-transitioning .previous-lyric {
+    animation: spotifyPrevious 500ms ease both;
+}
+
+#lyricsDisplay.is-transitioning .next-lyric {
+    animation: spotifyNext 500ms ease both;
+}
+
+@keyframes spotifyPrevious {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: .55;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spotifyNext {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: .55;
+        transform: translateY(0);
+    }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+    #lyricsDisplay .lyric-character,
+    #lyricsDisplay.is-transitioning .current-lyric,
+    #lyricsDisplay.is-transitioning #currentLyric {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
