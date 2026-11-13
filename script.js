@@ -25,12 +25,11 @@ const CONFIG = {
     syncTolerance: 0.065,
     hardSyncTolerance: 0.35,
 
-    // Menos trabajo de canvas en teléfonos; escritorio conserva su calidad.
-    visualizerFPS: window.matchMedia("(max-width: 760px)").matches ? 14 : 24,
-    visualizerBars: window.matchMedia("(max-width: 760px)").matches ? 22 : 48,
+    visualizerFPS: 24,
+    visualizerBars: 48,
     visualizerSensitivity: 1.35,
 
-    maxDpr: window.matchMedia("(max-width: 760px)").matches ? 0.9 : 1.25,
+    maxDpr: 1.25,
 
     lyricTransitionDuration: 650,
     lyricTypingMinSpeed: 18,
@@ -129,10 +128,6 @@ const state = {
     lyricTransitionTimer: null,
 
     secondaryVideoStarted: false,
-
-    // En fullscreen móvil pausamos el video de fondo para evitar decodificar
-    // dos videos simultáneamente. El video principal del reproductor sigue activo.
-    mobileFullscreen: false,
 
     destroyed: false
 
@@ -359,7 +354,6 @@ async function playMusic() {
         await elements.audio.play();
 
         if (
-            !state.mobileFullscreen &&
             elements.background.readyState >= 2 &&
             !elements.background.ended
         ) {
@@ -560,7 +554,6 @@ function synchronizeBackground(force = false) {
     const audio = elements.audio;
     const video = elements.background;
 
-    if (state.mobileFullscreen) return;
     if (!video || !Number.isFinite(audio.currentTime)) return;
 
     if (video.readyState < 1 || video.seeking) return;
@@ -628,7 +621,7 @@ function synchronizeBackground(force = false) {
 
 function synchronizeBackgroundPlayback() {
 
-    if (!state.playing || state.mobileFullscreen) return;
+    if (!state.playing) return;
 
     const video = elements.background;
 
@@ -678,7 +671,7 @@ elements.background.addEventListener("loadedmetadata", () => {
 });
 
 
-function backgroundSyncLoop() {
+function backgroundSyncLoop(timestamp) {
 
     state.backgroundSyncFrame = null;
 
@@ -690,17 +683,20 @@ function backgroundSyncLoop() {
         return;
     }
 
-    // No se ejecuta un requestAnimationFrame a 60 Hz para una tarea que solo
-    // necesita sincronizarse cada ~650 ms.
-    if (!state.mobileFullscreen) {
+    if (timestamp - state.syncLastTime >= CONFIG.syncInterval) {
+
         synchronizeBackground();
         synchronizeBackgroundPlayback();
+
+        state.syncLastTime = timestamp;
+
     }
 
     state.backgroundSyncFrame =
-        window.setTimeout(backgroundSyncLoop, CONFIG.syncInterval);
+        requestAnimationFrame(backgroundSyncLoop);
 
 }
+
 
 function startBackgroundSync() {
 
@@ -716,7 +712,7 @@ function startBackgroundSync() {
     state.syncLastTime = 0;
 
     state.backgroundSyncFrame =
-        window.setTimeout(backgroundSyncLoop, CONFIG.syncInterval);
+        requestAnimationFrame(backgroundSyncLoop);
 
 }
 
@@ -725,7 +721,7 @@ function stopBackgroundSync() {
 
     if (state.backgroundSyncFrame !== null) {
 
-        window.clearTimeout(state.backgroundSyncFrame);
+        cancelAnimationFrame(state.backgroundSyncFrame);
 
         state.backgroundSyncFrame = null;
 
@@ -1701,7 +1697,7 @@ document.addEventListener("visibilitychange", () => {
 
         synchronizeBackground(true);
 
-        if (!state.mobileFullscreen && elements.background.readyState >= 2) {
+        if (elements.background.readyState >= 2) {
             elements.background.play().catch(() => {});
         }
 
@@ -1946,48 +1942,6 @@ if (document.readyState === "loading") {
 
 const fullscreenButton = document.getElementById("fullscreenToggle");
 const experienceRoot = document.getElementById("experience");
-let orientationHint = null;
-let orientationDismissed = false;
-let orientationLockAttempted = false;
-
-function isMobileViewport() {
-    return window.matchMedia("(max-width: 760px)").matches;
-}
-
-function isPortraitViewport() {
-    return window.matchMedia("(orientation: portrait)").matches;
-}
-
-function ensureOrientationHint() {
-    // Se eliminó la tarjeta superior de orientación; el giro se intenta en silencio.
-}
-
-function refreshOrientationHint() {
-    // No mostrar mensajes ni overlays al maximizar en móvil.
-    if (orientationHint) orientationHint.classList.remove("is-visible");
-}
-
-async function requestLandscapeIfPossible() {
-    if (!isMobileViewport() || !isPortraitViewport()) {
-        refreshOrientationHint();
-        return;
-    }
-
-    if (!orientationLockAttempted) {
-        orientationLockAttempted = true;
-        try {
-            if (screen.orientation && typeof screen.orientation.lock === "function") {
-                await screen.orientation.lock("landscape");
-                refreshOrientationHint();
-                return;
-            }
-        } catch (error) {
-            // iOS Safari y varios navegadores no permiten bloquear orientación.
-        }
-    }
-
-    refreshOrientationHint();
-}
 
 function isExperienceFullscreen() {
     return document.fullscreenElement === experienceRoot ||
@@ -1998,23 +1952,6 @@ function updateFullscreenUI(active) {
     if (!fullscreenButton || !experienceRoot) return;
 
     experienceRoot.classList.toggle("is-fullscreen", active);
-    state.mobileFullscreen = active && isMobileViewport();
-
-    if (state.mobileFullscreen) {
-        // Pausar el segundo flujo de video libera bastante GPU/decodificación.
-        if (elements.background) elements.background.pause();
-    } else if (!active) {
-        orientationDismissed = false;
-        orientationLockAttempted = false;
-        if (screen.orientation && typeof screen.orientation.unlock === "function") {
-            try { screen.orientation.unlock(); } catch (error) {}
-        }
-        if (state.playing && elements.background && elements.background.readyState >= 2) {
-            synchronizeBackground(true);
-            elements.background.play().catch(() => {});
-        }
-    }
-
     fullscreenButton.setAttribute("aria-pressed", String(active));
     fullscreenButton.setAttribute(
         "aria-label",
@@ -2028,8 +1965,6 @@ function updateFullscreenUI(active) {
     if (typeof resizeVisualizer === "function") {
         requestAnimationFrame(() => resizeVisualizer());
     }
-
-    refreshOrientationHint();
 }
 
 async function toggleExperienceFullscreen() {
@@ -2062,19 +1997,13 @@ async function toggleExperienceFullscreen() {
             updateFullscreenUI(true);
         }
     }
-
-    // Se intenta girar automáticamente; si el navegador no lo permite,
-    // aparece una indicación para que la persona gire el teléfono.
-    await requestLandscapeIfPossible();
 }
 
 if (fullscreenButton && experienceRoot) {
     fullscreenButton.addEventListener("click", toggleExperienceFullscreen);
 
     document.addEventListener("fullscreenchange", () => {
-        const active = document.fullscreenElement === experienceRoot;
-        updateFullscreenUI(active);
-        if (active) requestLandscapeIfPossible();
+        updateFullscreenUI(document.fullscreenElement === experienceRoot);
     });
 
     document.addEventListener("keydown", (event) => {
@@ -2084,16 +2013,9 @@ if (fullscreenButton && experienceRoot) {
         }
     });
 
-    const handleViewportChange = () => {
-        refreshOrientationHint();
+    window.addEventListener("resize", () => {
         if (experienceRoot.classList.contains("is-fullscreen")) {
             if (typeof resizeVisualizer === "function") resizeVisualizer();
         }
-    };
-
-    window.addEventListener("resize", handleViewportChange, { passive: true });
-    window.addEventListener("orientationchange", handleViewportChange, { passive: true });
-    if (screen.orientation && screen.orientation.addEventListener) {
-        screen.orientation.addEventListener("change", handleViewportChange);
-    }
+    }, { passive: true });
 }
