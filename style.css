@@ -2276,3 +2276,110 @@ input:focus-visible {
         transform: none !important;
     }
 }
+
+
+/* ============================================================
+   ONEWAY — SPOTIFY-STYLE LYRIC TRANSITIONS
+   Frase que entra, líneas que se superponen y texto carácter a carácter.
+   Requiere que JavaScript cree spans .lyric-character.
+   ============================================================ */
+
+/* El bloque de letras mantiene las líneas apiladas y permite el movimiento. */
+.lyrics-display {
+    perspective: 700px;
+    transform-style: preserve-3d;
+}
+
+/* La frase activa entra desde abajo con una pequeña elevación. */
+.lyrics-display.is-transitioning .current-lyric {
+    animation: onewayLyricCurrentIn 620ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+/* La frase anterior se desplaza hacia arriba mientras pierde presencia. */
+.lyrics-display.is-transitioning .previous-lyric {
+    animation: onewayLyricPreviousOut 520ms cubic-bezier(.2, .7, .2, 1) both;
+}
+
+/* La frase siguiente sube suavemente para ocupar su lugar. */
+.lyrics-display.is-transitioning .next-lyric {
+    animation: onewayLyricNextIn 620ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@keyframes onewayLyricCurrentIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0) scale(.975);
+    }
+    70% { opacity: 1; }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes onewayLyricPreviousOut {
+    0% {
+        opacity: .65;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: .22;
+        transform: translate3d(0, -9px, 0);
+    }
+}
+
+@keyframes onewayLyricNextIn {
+    0% {
+        opacity: .25;
+        transform: translate3d(0, 10px, 0);
+    }
+    100% {
+        opacity: .65;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Cada carácter se revela con un pequeño movimiento ascendente.
+   --char-delay y --char-duration los proporciona JavaScript. */
+.lyrics-display .current-lyric .lyric-character,
+.lyrics-display .lyric-character {
+    display: inline-block !important;
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(.975);
+    animation: onewayCharacterIn
+        var(--char-duration, 260ms)
+        cubic-bezier(.16, 1, .3, 1)
+        var(--char-delay, 0ms)
+        both !important;
+    filter: none !important;
+    will-change: auto;
+}
+
+@keyframes onewayCharacterIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0) scale(.975);
+    }
+    68% { opacity: 1; }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+/* Evita que el brillo infinito original compita con la entrada de la frase. */
+.current-lyric {
+    animation: none;
+}
+
+/* Si el usuario solicita menos movimiento, se muestra el texto sin animación. */
+@media (prefers-reduced-motion: reduce) {
+    .lyrics-display.is-transitioning .current-lyric,
+    .lyrics-display.is-transitioning .previous-lyric,
+    .lyrics-display.is-transitioning .next-lyric,
+    .lyrics-display .lyric-character {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
